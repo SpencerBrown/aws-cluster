@@ -1,0 +1,7 @@
+# Add all files in this environment to git tracking.
+
+- name: Add files to git
+  command: "git add {{ inventory_dir }}"
+  args:
+    warn: no
+  changed_when: false

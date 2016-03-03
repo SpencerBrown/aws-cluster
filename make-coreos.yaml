@@ -1,0 +1,5 @@
+- name: Set up the CoreOS configuration for an environment
+  hosts: coreos
+  gather_facts: no
+  roles:
+  - coreos
