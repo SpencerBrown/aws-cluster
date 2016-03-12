@@ -1,4 +1,4 @@
-- name: Create a new environment (top level directory name)
+- name: Create a new environment
   hosts: local
   gather_facts: no
   tasks:
@@ -17,10 +17,10 @@
     - "{{ env }}/secret-files"
 
   - name: Create hosts file
-    copy:
+    template:
       dest: "{{ env }}/hosts"
-      content: "[local]\nlocalhost ansible_connection=local env={{ env }}"
-      force: no
+      src: roles/misc/templates/hosts
+      content: "[local]\nlocalhost ansible_connection=local ansible_python_interpreter=\"/usr/bin/env python\" env={{ env }}"
 
   - name: Create ansible.cfg file
     copy:

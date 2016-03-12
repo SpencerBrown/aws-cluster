@@ -1,6 +1,4 @@
 # Select CoreOS AMI to use
 
 coreos_channel: alpha
-coreos_region: us-west-2
 coreos_ami_type: hvm
-coreos_zone: us-west-2a

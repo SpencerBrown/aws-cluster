@@ -1,0 +1,3 @@
+- include: make-vpc.yaml
+- include: get-coreos-ami.yaml
+- include: make-cluster.yaml

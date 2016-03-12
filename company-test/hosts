@@ -1,0 +1,10 @@
+[local]
+localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python" env=company-test
+
+[master]
+master-1 ansible_ssh_host=52.37.138.47
+
+[worker]
+
+[etcd]
+etcd-1 ansible_ssh_host=172.2.1.7

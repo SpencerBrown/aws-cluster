@@ -1,0 +1,20 @@
+# local group is for local operations (on this machine)
+[local]
+localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python" env={{ env }}
+
+[master]
+
+[worker]
+
+[etcd]
+
+
+master ansible_ssh_host={{ kube_api_public_ip }} kube_docker_bip={{ kube_pod_ip_prefix }}.{{ kube_master_node }}.1/24
+
+{% for node_num in range(0, kube_worker_count) %}
+ip-{{ kube_node_ip_prefix|replace(".","-") }}-{{ kube_worker_subnet }}-{{ kube_worker_node + node_num }} ansible_ssh_host={{ kube_node_ip_prefix }}.{{ kube_worker_subnet }}.{{ kube_worker_node + node_num }} kube_node_index={{ node_num }} kube_docker_bip={{ kube_pod_ip_prefix }}.{{ kube_worker_node + node_num }}.1/24
+{% endfor %}
+
+{% for node_num in range(0, kube_etcd_count) %}
+etcd-{{ node_num + 1 }} ansible_ssh_host={{ kube_node_ip_prefix }}.{{ kube_etcd_subnet }}.{{ kube_etcd_node + node_num }} kube_node_index={{ node_num }} kube_docker_bip={{ kube_pod_ip_prefix }}.{{ kube_etcd_node + node_num }}.1/24
+{% endfor %}

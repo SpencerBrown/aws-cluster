@@ -1,0 +1,47 @@
+
+- name: Create the nodes
+  ec2:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    zone: "{{ aws_zone }}"
+    exact_count: 1
+    count_tag:
+      Name: "{{ env }}-{{cluster_nodes.name }}-{{ item }}"
+    image: "{{ coreos_ami }}"
+    instance_type: "{{ cluster_nodes.instance_type }}"
+    key_name: "{{ env }}"
+    source_dest_check: no
+    vpc_subnet_id: "{{ [cluster_subnet_public.subnet.id, cluster_subnet_private.subnet.id][cluster_nodes.subnet] }}"
+    group_id: "{{ [cluster_sg_public.group_id, cluster_sg_private.group_id][cluster_nodes.subnet] }}"
+    private_ip: "{{ cluster_ip_prefix }}.{{ cluster_nodes.subnet }}.{{ cluster_nodes.node_number + (item|int) - 1 }}"
+    assign_public_ip: "{{ ['yes', 'no'][cluster_nodes.subnet] }}"
+    volumes:
+    - device_name: "/dev/xvda"
+      delete_on_termination: True
+      volume_type: "{{ cluster_nodes.root_volume_type }}"
+      volume_size: "{{ cluster_nodes.root_volume_size }}"
+    instance_tags:
+      Name: "{{ env }}-{{cluster_nodes.name }}-{{ item }}"
+  with_sequence: start=1 end={{ cluster_nodes.count }}
+  register: cluster_nodes_cluster
+
+- debug: var=cluster_nodes_cluster
+
+- name: Add nodes to in-memory dynamic inventory
+  add_host:
+    groups: "{{ cluster_nodes.name }}"
+    name: "{{ cluster_nodes.name }}-{{ item }}"
+    ansible_ssh_host: "{{ [cluster_nodes_cluster.results[item|int - 1].tagged_instances[0].public_ip, cluster_nodes_cluster.results[item|int - 1].tagged_instances[0].private_ip][cluster_nodes.subnet] }}"
+  with_sequence: start=1 end={{ cluster_nodes.count }}
+  changed_when: false
+
+- debug: var=groups
+
+- name: Update the inventory file
+  lineinfile:
+    dest: "{{ inventory_dir }}/hosts"
+    insertafter: "\\[{{ cluster_nodes.name }}\\]"
+    line: "{{ item }} ansible_ssh_host={{ hostvars[item].ansible_ssh_host }}"
+    state: present
+  with_items: "{{ groups[cluster_nodes.name] }}"

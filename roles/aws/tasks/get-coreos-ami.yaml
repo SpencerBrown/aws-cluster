@@ -1,0 +1,11 @@
+- name: Get CoreOS AMI list to string
+  uri:
+    url: http://{{ coreos_channel }}.release.core-os.net/amd64-usr/current/coreos_production_ami_all.json
+    return_content: yes
+  register: coreos_amis_json
+
+- name: get the desired AMI
+  set_fact:
+    coreos_ami: "{{ ((coreos_amis_json.content | from_json).amis | selectattr('name', 'equalto', aws_region) | map(attribute=coreos_ami_type) | list)[0] }}"
+
+- debug: msg="CoreOS {{ coreos_channel }} {{ coreos_ami_type }} AMI for region {{ aws_region }} found. ID {{ coreos_ami }}"

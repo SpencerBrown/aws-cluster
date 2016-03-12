@@ -1,0 +1,23 @@
+- name: Create a keypair in AWS for this environment
+  ec2_key:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    name: "{{ env }}"
+    key_material: "{{ item }}"
+  with_file: "{{ inventory_dir }}/public-files/{{ env }}-key.pub"
+
+- include: make-nodes.yaml cluster_nodes={{ cluster_etcd }}
+- include: make-nodes.yaml cluster_nodes={{ cluster_master }}
+
+- name: Create the SSH config file
+  template:
+    src: ssh.config
+    dest: "{{ inventory_dir }}/ssh.config"
+
+- name: Update ansible.cfg
+  template:
+    src: ansible.cfg
+    dest: "{{ inventory_dir }}/ansible.cfg"
+
+- include: roles/misc/tasks/add-to-git.yaml
