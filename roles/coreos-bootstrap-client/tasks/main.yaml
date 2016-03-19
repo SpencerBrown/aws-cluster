@@ -1,0 +1,4 @@
+
+- include: ansible-setup.yaml
+
+- include: nfs-client-setup.yaml

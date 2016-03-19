@@ -2,9 +2,19 @@
 localhost ansible_connection=local ansible_python_interpreter="/usr/bin/env python" env=company-test
 
 [master]
-master-1 ansible_ssh_host=52.37.138.47
+master-1 ansible_host=52.27.8.8 cluster_nfs=server
 
 [worker]
 
 [etcd]
-etcd-1 ansible_ssh_host=172.2.1.7
+etcd-1 ansible_host=172.2.1.7 cluster_nfs=client
+
+[coreos:children]
+master
+worker
+etcd
+
+[coreos:vars]
+env=company-test
+ansible_user=core
+ansible_python_interpreter="/opt/bin/pypy/bin/pypy"

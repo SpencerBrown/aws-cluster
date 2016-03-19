@@ -1,0 +1,14 @@
+- name: Configure etcd service on node
+  template:
+    src: cluster-etcd.service
+    dest: /etc/systemd/system/cluster-etcd.service
+  register: cluster_etcd_service
+
+- command: systemctl daemon-reload
+  when: cluster_etcd_service.changed
+
+- name: Enable and start the etcd service
+  service:
+    name: cluster-etcd.service
+    enabled: yes
+    state: started

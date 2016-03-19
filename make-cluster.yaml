@@ -1,0 +1,6 @@
+- name: Provision etcd clustr
+  hosts: etcd
+  become: yes
+  gather_facts: no
+  roles:
+  - coreos-etcd

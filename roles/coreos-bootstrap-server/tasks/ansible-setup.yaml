@@ -1,0 +1,15 @@
+
+- name: Install PyPy on cluster NFS server
+  script: ansible-setup.sh {{ pypy_version }}
+  register: pypy_exit_code
+  failed_when: pypy_exit_code.rc == 3
+  changed_when: pypy_exit_code.rc == 0
+
+- name: Ensure required Python packages are installed
+  pip:
+    executable: /opt/bin/pypy/bin/pip
+    name: "{{ item }}"
+    state: present
+  with_items:
+  - docker-py
+  - boto

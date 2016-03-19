@@ -1,0 +1,30 @@
+
+[Unit]
+Description={{ env }} etcd service
+Conflicts=etcd.service,etcd2.service
+
+[Service]
+User=etcd
+Type=notify
+ExecStart=/usr/bin/etcd2 \
+    --name={{ inventory_hostname }} \
+    --data-dir=/var/lib/etcd2 \
+    --initial-cluster={% for host in groups['etcd'] %}{{ host }}=http://{{ hostvars[host]['ansible_host'] }}:{{ etcd_peer_port }}{% if not loop.last %},{% endif %}{% endfor %} \
+    --listen-client-urls=http://0.0.0.0:{{ etcd_client_port }} \
+    --advertise-client-urls=http://{{ ansible_host }}:{{ etcd_client_port }} \
+    --initial-advertise-peer-urls=http://{{ ansible_host }}:{{ etcd_peer_port }} \
+    --listen-peer-urls=http://0.0.0.0:{{ etcd_peer_port }} \
+    --initial-cluster-token={{ env }} \
+    --initial-cluster-state=new \
+    --election-timeout=1200 \
+    --heartbeat-interval=100 \
+    --snapshot-count=10000 \
+    --max-snapshots=5 \
+    --max-wals=5
+Restart=always
+RestartSec=10s
+LimitNOFILE=40000
+TimeoutStartSec=0
+
+[Install]
+WantedBy=multi-user.target

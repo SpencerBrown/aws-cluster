@@ -1,0 +1,6 @@
+
+- name: Install PyPy on cluster NFS client, copied from server
+  script: ansible-setup.sh {{ pypy_version }}
+  register: pypy_exit_code
+  failed_when: pypy_exit_code.rc == 3
+  changed_when: pypy_exit_code.rc == 0

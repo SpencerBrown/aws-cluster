@@ -15,9 +15,4 @@
     src: ssh.config
     dest: "{{ inventory_dir }}/ssh.config"
 
-- name: Update ansible.cfg
-  template:
-    src: ansible.cfg
-    dest: "{{ inventory_dir }}/ansible.cfg"
-
 - include: roles/misc/tasks/add-to-git.yaml

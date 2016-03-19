@@ -1,5 +1,5 @@
 
-- name: Create the nodes
+- name: Create the nodes for a particular group in the cluster
   ec2:
     aws_access_key: "{{ aws_access_key }}"
     aws_secret_key: "{{ aws_secret_key }}"
@@ -28,20 +28,21 @@
 
 - debug: var=cluster_nodes_cluster
 
-- name: Add nodes to in-memory dynamic inventory
+- name: Add these nodes to in-memory dynamic inventory
   add_host:
     groups: "{{ cluster_nodes.name }}"
     name: "{{ cluster_nodes.name }}-{{ item }}"
-    ansible_ssh_host: "{{ [cluster_nodes_cluster.results[item|int - 1].tagged_instances[0].public_ip, cluster_nodes_cluster.results[item|int - 1].tagged_instances[0].private_ip][cluster_nodes.subnet] }}"
+    ansible_host: "{{ [cluster_nodes_cluster.results[item|int - 1].tagged_instances[0].public_ip, cluster_nodes_cluster.results[item|int - 1].tagged_instances[0].private_ip][cluster_nodes.subnet] }}"
+    cluster_nfs: "{{ cluster_nodes.nfs_role }}"
   with_sequence: start=1 end={{ cluster_nodes.count }}
   changed_when: false
 
-- debug: var=groups
 
-- name: Update the inventory file
+- name: Add inventory file lines for this group
   lineinfile:
     dest: "{{ inventory_dir }}/hosts"
     insertafter: "\\[{{ cluster_nodes.name }}\\]"
-    line: "{{ item }} ansible_ssh_host={{ hostvars[item].ansible_ssh_host }}"
+    regexp: "^{{ item }}"
+    line: "{{ item }} ansible_host={{ hostvars[item].ansible_host }} cluster_nfs={{ hostvars[item].cluster_nfs }}"
     state: present
   with_items: "{{ groups[cluster_nodes.name] }}"

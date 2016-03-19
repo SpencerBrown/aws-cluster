@@ -17,6 +17,7 @@ cluster_etcd:
   root_volume_size: 10
   node_number: 7
   subnet: 1
+  nfs_role: client
 
 cluster_master:
   name: master
@@ -26,6 +27,7 @@ cluster_master:
   root_volume_size: 10
   node_number: 20
   subnet: 0
+  nfs_role: server
 
 cluster_worker:
   name: worker
@@ -35,6 +37,7 @@ cluster_worker:
   root_volume_size: 10
   node_number: 30
   subnet: 1
+  nfs_role: client
 
 # the following is here temporarily until Ansible supports the AWS NAT Gateway.
 cluster_nat_gateway:

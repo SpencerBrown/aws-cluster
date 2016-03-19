@@ -1,0 +1,13 @@
+- name: set up NFS client service
+  service:
+    name: rpc-statd
+    enabled: yes
+    state: started
+
+- name: set up mount
+  mount:
+    src: "{{ cluster_ip_prefix }}.0.20:/opt/bin"
+    name: /var/cluster-bin
+    fstype: nfs
+    state: mounted
+

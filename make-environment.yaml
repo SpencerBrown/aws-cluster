@@ -20,12 +20,11 @@
     template:
       dest: "{{ env }}/hosts"
       src: roles/misc/templates/hosts
-      content: "[local]\nlocalhost ansible_connection=local ansible_python_interpreter=\"/usr/bin/env python\" env={{ env }}"
 
   - name: Create ansible.cfg file
-    copy:
+    template:
       dest: "{{ env }}/ansible.cfg"
-      content: "[defaults]\ninventory = hosts\nvault_password_file = vault-password"
+      src: roles/misc/templates/ansible.cfg
 
   - name: create variable names file "plaintextvars.yaml" in group_vars defining "plaintext_files" variable
     # This will also ensure there's a file in group_vars/local, so that Git will commit the directories
