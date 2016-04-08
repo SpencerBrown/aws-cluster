@@ -1,0 +1,10 @@
+
+- name: Update ansible.cfg file
+  template:
+    dest: "{{ inventory_dir }}/ansible.cfg"
+    src: "roles/environment-setup/templates/ansible.cfg"
+
+- name: Create ssh config file
+  template:
+    dest: "{{ inventory_dir }}/ssh.config"
+    src: "roles/environment-setup/templates/ssh.config"

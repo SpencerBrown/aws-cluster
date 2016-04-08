@@ -1,0 +1,14 @@
+
+- include: setup-hosts.yaml
+
+- include: get-coreos-ami.yaml
+
+- include: make-keypair.yaml
+
+- include: setup-hosts.yaml
+
+- include: make-cluster.yaml
+
+- include: setup-config.yaml
+
+- include: roles/environment-initial/tasks/add-to-git.yaml

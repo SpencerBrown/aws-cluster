@@ -1,0 +1,48 @@
+
+
+- name: check if kubelet/kubectl already installed
+  stat:
+    path: /opt/bin/kubelet
+  register: kubelet_present
+
+- block:  # Install kubelet and kubectl
+
+  - name: Get the Kubernetes release binary
+    command: "wget --directory-prefix=/opt/bin {{ kubernetes_release_url }}"
+
+  - name: unarchive the Kubernetes release binary
+    unarchive:
+      copy: no
+      dest: /opt/bin
+      src: /opt/bin/kubernetes.tar.gz
+
+  - name: unarchive the Kubernetes server binary
+    unarchive:
+      copy: no
+      dest: /opt/bin
+      src: /opt/bin/kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+
+  - name: copy the desired server binaries
+    copy:
+      src: /opt/bin/kubernetes/server/bin/{{ item }}
+      dest: /opt/bin/{{ item }}
+      mode: 0755
+      remote_src: yes
+    with_items:
+    - kubelet
+    - kubectl
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-proxy
+    - kube-scheduler
+
+  - name: Clean up Kubernetes downloads
+    file:
+      path: /opt/bin/kubernetes
+      state: absent
+
+  - file:
+      path: /opt/bin/kubernetes.tar.gz
+      state: absent
+
+  when: kubelet_present.stat.exists == false or kubernetes_upgrade == true

@@ -1,0 +1,3 @@
+group_vars/*/secret/
+vault-password
+files/secret/

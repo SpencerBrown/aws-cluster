@@ -1,0 +1,5 @@
+
+  - include: encrypt-secrets.yaml
+
+  - include: ../../roles/environment-initial/tasks/add-to-git.yaml
+

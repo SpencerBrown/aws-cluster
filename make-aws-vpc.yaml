@@ -1,0 +1,5 @@
+- name: Create VPC in AWS
+  hosts: local
+  gather_facts: False
+  roles:
+  - aws-vpc

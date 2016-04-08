@@ -1,0 +1,8 @@
+- name: Create a keypair in AWS for this environment
+  ec2_key:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    name: "{{ env }}"
+    key_material: "{{ item }}"
+  with_file: "{{ inventory_dir }}/files/public/{{ env }}-key.pub"

@@ -1,0 +1,18 @@
+[Unit]
+Description={{ env }} Kubernetes APIserver
+
+[Service]
+ExecStart=/opt/bin/kube-apiserver \
+        --cloud-provider={{ cluster_cloud_provider }} \
+        --allow-privileged=true \
+        --etcd-servers={% for host in groups['etcd'] %}http://{{ hostvars[host]['ansible_host'] }}:{{ etcd_client_port }}{% if not loop.last %},{% endif %}{% endfor %} \
+        --insecure-bind-address=127.0.0.1 \
+        --secure-port=443 \
+        --service-cluster-ip-range={{ kubernetes_service_ip_range }} \
+        --service-node-port-range=30000-37000 \
+        --v=1
+Restart=always
+RestartSec=10s
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,6 @@
+- name: Bootstrap the Kubernetes cluster master
+  hosts: master
+  become: yes
+  gather_facts: no
+  roles:
+  - kubernetes-master

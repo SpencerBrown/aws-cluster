@@ -1,0 +1,4 @@
+- include: get-binaries.yaml
+
+- include: run-services.yaml
+

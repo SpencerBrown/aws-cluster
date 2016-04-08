@@ -1,0 +1,5 @@
+
+- name: Update hosts file
+  template:
+    dest: "{{ inventory_dir }}/hosts"
+    src: "roles/environment-setup/templates/hosts"

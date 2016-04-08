@@ -1,0 +1,8 @@
+[Unit]
+Description = Mount NFS shared binaries
+[Mount]
+What = {{ cluster_ip_prefix }}.0.20:/srv/served
+Where = /srv/served
+Type = nfs
+[Install]
+WantedBy = multi-user.target

@@ -1,0 +1,29 @@
+
+- name: Create variables for Terraform
+# keep them in secret place, since AWS credentials are there
+  template:
+    src: cluster.tfvars
+    dest: "{{ inventory_dir }}/files/secret/cluster.tfvars"
+
+#- name: Create the VPC using Terraform
+#  command: "terraform apply --var-file=files/secret/cluster.tfvars --state=files/secret/{{ env }}.tfstate {{ role_path }}/files"
+#  register: terraform_out
+#
+#- debug: var=terraform_out.stdout_lines
+
+- copy:
+    dest: "{{ inventory_dir }}/terraform-plan.sh"
+    content: "terraform plan --var-file=files/secret/cluster.tfvars --state=files/secret/{{ env }}.tfstate --out=files/secret/cluster.tfplan {{ role_path }}/files\n"
+    mode: 0755
+
+- copy:
+    dest: "{{ inventory_dir }}/terraform-apply.sh"
+    content: "terraform apply --state=files/secret/{{ env }}.tfstate files/secret/cluster.tfplan\n"
+    mode: 0755
+
+- name: Capture Terraform values in Ansible variables file
+  shell: "terraform output --state=files/secret/{{ env }}.tfstate | sed 's/ = /: /g' > group_vars/all/aws-terraform-vars.yaml"
+
+- include: "../roles/environment-initial/tasks/add-to-git.yaml"
+
+- debug: msg="If needed, run ./terraform-plan.sh and ./terraform-apply.sh to update the VPC. Then, run this playbook again."

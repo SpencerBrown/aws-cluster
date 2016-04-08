@@ -1,0 +1,4 @@
+# AWS credentials
+
+aws_access_key: "your AWS access key here"
+aws_secret_key: "your AWS secret key here"

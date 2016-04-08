@@ -9,12 +9,10 @@ trap 'got_error ${LINENO}' ERR
 
 if [ ! -f /opt/bin/pypy/bin/pypy ]; then
 
-  mkdir -p /var/cluster-bin
-  systemctl start rpc-statd
-  mount 172.2.0.20:/opt/bin /var/cluster-bin
+  mkdir -p /var/cluster_bin
+  mount 172.20.0.20:/opt/bin /var/cluster_bin
   mkdir -p /opt/bin
-  cd /opt/bin
-  cp -R /var/cluster-bin/pypy/ /opt/bin/
+  cp -R /var/cluster_bin/pypy/ /opt/bin/
 
 else
   exit 1

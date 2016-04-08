@@ -1,5 +1,0 @@
-- name: Set up the AWS resources for an environment
-  hosts: local
-  gather_facts: False
-  roles:
-  - aws

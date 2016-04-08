@@ -1,0 +1,5 @@
+# Settings for cluster
+
+env: test2
+cluster_type_coreos: True
+cluster_cloud_provider: aws

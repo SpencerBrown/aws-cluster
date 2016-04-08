@@ -1,0 +1,14 @@
+- name: Run the Kubernetes apiserver as a systemd unit
+  template:
+    src: apiserver.service
+    dest: /etc/systemd/system/apiserver.service
+  register: apiserver_service
+
+- command: systemctl daemon-reload
+  when: apiserver_service.changed
+
+- name: Enable and start the apiserver service
+  service:
+    name: apiserver.service
+    enabled: yes
+    state: started

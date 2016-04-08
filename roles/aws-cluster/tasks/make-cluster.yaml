@@ -1,0 +1,10 @@
+
+- include: make-nodes.yaml cluster_nodes={{ cluster_etcd }}
+  when: cluster_etcd.count > 0
+- include: make-nodes.yaml cluster_nodes={{ cluster_master }}
+  when: cluster_master.count > 0
+- include: make-nodes.yaml cluster_nodes={{ cluster_worker }}
+  when: cluster_worker.count > 0
+
+#- include: make_ssh_config.yaml
+

@@ -1,0 +1,182 @@
+# DEPRECATED this now done with Terraform in the aws-vpc role
+
+- name: Create the VPC
+  ec2_vpc_net:
+    name: "{{ env }}"
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    cidr_block: "{{ cluster_ip_prefix }}.0.0/16"
+    tags:
+      KubernetesCluster: "{{ env }}"
+    state: present
+  register: cluster_vpc
+
+- debug: var=cluster_vpc
+
+- name: Create the public subnet
+  ec2_vpc_subnet:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ cluster_vpc.vpc.id }}"
+    az: "{{ aws_zone }}"
+    cidr: "{{ cluster_ip_prefix }}.0.0/24"
+    tags:
+      Name: "{{ env }}-public"
+    state: present
+  register: cluster_subnet_public
+
+- debug: var=cluster_subnet_public
+
+- name: Create the private subnet
+  ec2_vpc_subnet:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ cluster_vpc.vpc.id }}"
+    az: "{{ aws_zone }}"
+    cidr: "{{ cluster_ip_prefix }}.1.0/24"
+    tags:
+      Name: "{{ env }}-private"
+      KubernetesCluster: "{{ env }}"
+    state: present
+  register: cluster_subnet_private
+
+- debug: var=cluster_subnet_private
+
+- name: Create the public security group
+  ec2_group:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ cluster_vpc.vpc.id }}"
+    name: "{{ env }}-public"
+    description: "{{ env }}: Public SG"
+
+    rules:
+    - proto: tcp
+      from_port: 80
+      to_port: 80
+      cidr_ip: 0.0.0.0/0
+    - proto: tcp
+      from_port: 443
+      to_port: 443
+      cidr_ip: 0.0.0.0/0
+    - proto: tcp
+      from_port: "{{ cluster_ssh_port }}"
+      to_port: "{{ cluster_ssh_port }}"
+      cidr_ip: 0.0.0.0/0
+    - proto: -1
+      from_port: 0
+      to_port: 0
+      cidr_ip: "{{ cluster_vpc.vpc.cidr_block }}"
+
+    state: present
+  register: cluster_sg_public
+
+- name: Create the private security group
+  ec2_group:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ cluster_vpc.vpc.id }}"
+    name: "{{ env }}-private"
+    description: "{{ env }}: Private SG"
+
+    rules:
+    - proto: -1
+      from_port: 0
+      to_port: 0
+      cidr_ip: "{{ cluster_vpc.vpc.cidr_block }}"
+
+    state: present
+  register: cluster_sg_private
+
+- debug: var=cluster_sg_private
+
+- name: Create the ELB security group
+  ec2_group:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ cluster_vpc.vpc.id }}"
+    name: "{{ env }}-elb"
+    description: "{{ env }}: ELB SG"
+
+    rules:
+    - proto: tcp
+      from_port: 80
+      to_port: 80
+      cidr_ip: 0.0.0.0/0
+    - proto: tcp
+      from_port: 443
+      to_port: 443
+      cidr_ip: 0.0.0.0/0
+
+    state: present
+  register: cluster_sg_elb
+
+- debug: var=cluster_sg_elb
+
+- name: Create the Internet Gateway
+  ec2_vpc_igw:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ cluster_vpc.vpc.id }}"
+    state: present
+  register: cluster_igw
+
+- debug: var=cluster_igw
+
+- name: Create the Elastic IP for the NAT Gateway
+  debug: msg="Ansible cannot yet create a NAT gateway. You must manually create the EIP and put its info in cluster_nat_eip"
+
+- name: Create the NAT Gateway
+  debug: msg="Ansible cannot yet create a NAT gateway. You must manually create the NGW and put its ID in cluster_nat_gateway"
+
+- name: Create the public route table
+  ec2_vpc_route_table:
+    aws_access_key: "{{ aws_access_key }}"
+    aws_secret_key: "{{ aws_secret_key }}"
+    region: "{{ aws_region }}"
+    vpc_id: "{{ cluster_vpc.vpc.id }}"
+
+    subnets:
+    - "{{ cluster_subnet_public.subnet.id }}"
+
+    routes:
+    - dest: "0.0.0.0/0"
+      gateway_id: igw
+
+    tags:
+      Name: "{{ env }}-public"
+    state: present
+  register: cluster_rt_public
+
+- debug: var=cluster_rt_public
+
+- name: Create the private route table
+  debug: msg="Ansible cannout yet create a route table with a route to a NAT gateway. Private subnet must be manually created and info placed in cluster_rt_private"
+#  ec2_vpc_route_table:
+#    aws_access_key: "{{ aws_access_key }}"
+#    aws_secret_key: "{{ aws_secret_key }}"
+#    region: "{{ aws_region }}"
+#    vpc_id: "{{ cluster_vpc.vpc.id }}"
+#
+#    subnets:
+#    - "{{ cluster_subnet_private.subnet.id }}"
+#
+#    routes:
+#    - dest: "0.0.0.0/0"
+#      interface_id: "{{ cluster_nat_gateway.ngw.interface_id }}"
+#
+#    tags:
+#      Name: "{{ env }}-private"
+#      KubernetesCluster: "{{ env }}"
+#    state: present
+#  register: cluster_rt_private
+#
+#- debug: var=cluster_rt_private
+

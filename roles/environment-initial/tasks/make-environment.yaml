@@ -1,0 +1,86 @@
+- fail:
+    msg: "Please specify the cluster name and type(s) (use -e cluster=<name>,<type>,...\nValid types are: coreos aws"
+  when: cluster is not defined
+
+- set_fact:
+    env: "{{ (cluster.split(','))[0] }}"
+
+- set_fact:
+    cluster_type_coreos: "{{ cluster.find('coreos') != -1 }}"
+
+- set_fact:
+    cluster_cloud_provider: "aws"
+  when: "{{ cluster.find('aws') != -1 }}"
+
+- debug: msg="Making {{ env }} environment, coreos={{ cluster_type_coreos }}, cloud={{ cluster_cloud_provider }}"
+
+- name: Create directory structure
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+  - "{{ env }}/group_vars/all/secret"
+  - "{{ env }}/files/secret"
+  - "{{ env }}/files/public"
+
+- name: create .gitignore so secrets aren't pushed to remote Git repositories
+  copy:
+    src: dot-gitignore
+    dest: "{{ env }}/.gitignore"
+
+- name: Create initial ansible.cfg file
+  copy:
+    src: ansible.cfg
+    dest: "{{ env }}/ansible.cfg"
+
+- name: Create initial hosts file
+  copy:
+    src: hosts
+    dest: "{{ env }}/hosts"
+
+- name: Create Kubernetes variables file
+  copy:
+    src: kubernetes-vars.yaml
+    dest: "{{ env }}/group_vars/all/kubernetes-vars.yaml"
+
+- name: Create cluster variables file
+  template:
+    src: cluster-vars.yaml
+    dest: "{{ env }}/group_vars/all/cluster-vars.yaml"
+
+- name: Create CoreOS variables file if asked for
+  copy:
+    src: coreos-vars.yaml
+    dest: "{{ env }}/group_vars/all/coreos-vars.yaml"
+  when: cluster_type_coreos
+
+- name: Create AWS variables file and keys file if asked for
+  copy:
+    src: aws-vars.yaml
+    dest: "{{ env }}/group_vars/all/aws-vars.yaml"
+  when: cluster_cloud_provider == "aws"
+
+- copy:
+    src: aws-keys.yaml
+    dest: "{{ env }}/group_vars/all/secret/aws-keys.yaml"
+  when: cluster_cloud_provider == "aws"
+
+- name: create SSH keypair for this environment's machines
+  command: "ssh-keygen -f ~/.ssh/{{ env }}-key -N \"\""
+  args:
+    creates: "~/.ssh/{{ env }}-key"
+
+- name: copy private SSH key to files/secret directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ env }}/files/secret/"
+    mode: 0600
+  with_items:
+  - "~/.ssh/{{ env }}-key"
+
+- name: copy public SSH key to files/public directory
+  copy:
+    src: "{{ item }}"
+    dest: "{{ env }}/files/public/"
+  with_items:
+  - "~/.ssh/{{ env }}-key.pub"

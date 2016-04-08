@@ -1,0 +1,8 @@
+env = "{{ env }}"
+aws_access_key = "{{ aws_access_key }}"
+aws_secret_key = "{{ aws_secret_key }}"
+aws_region = "{{ aws_region }}"
+aws_zone = "{{ aws_zone }}"
+cluster_ip_prefix = "{{ cluster_ip_prefix }}"
+cluster_pod_cidr = "{{ cluster_pod_cidr }}"
+cluster_ssh_port = "{{ cluster_ssh_port }}"

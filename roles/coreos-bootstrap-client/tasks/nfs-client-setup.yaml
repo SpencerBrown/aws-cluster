@@ -1,13 +1,17 @@
-- name: set up NFS client service
-  service:
-    name: rpc-statd
-    enabled: yes
-    state: started
+#- name: set up NFS client service
+#  service:
+#    name: rpc-statd
+#    enabled: yes
+#    state: started
+
+# TODO: do this with systemd mount unit instead, using template var-cluster_bin.mount
+
+
 
 - name: set up mount
   mount:
     src: "{{ cluster_ip_prefix }}.0.20:/opt/bin"
-    name: /var/cluster-bin
+    name: /var/cluster_bin
     fstype: nfs
     state: mounted
 

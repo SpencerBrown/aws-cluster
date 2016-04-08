@@ -13,3 +13,11 @@
   gather_facts: no
   roles:
   - coreos-bootstrap-client
+
+- name: Light up the etcd cluster
+  hosts:
+  - etcd
+  become: yes
+  gather_facts: no
+  roles:
+  - coreos-etcd

@@ -1,5 +1,3 @@
 *.swp
 .idea/
-secret-files/
-vault-password
 *.retry

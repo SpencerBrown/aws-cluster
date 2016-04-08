@@ -1,0 +1,5 @@
+
+coreos_channel: alpha
+cluster_user: core
+cluster_ssh_port: 22
+pypy_version: "5.0.1"

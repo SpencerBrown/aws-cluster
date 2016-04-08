@@ -1,61 +1,8 @@
 - name: Create a new environment
   hosts: local
   gather_facts: no
-  tasks:
+  roles:
+  - environment-initial
 
-  - fail:
-      msg: "Please specify the environment name (use the env variable)"
-    when: env is not defined
-
-  - name: Create directory structure
-    file:
-      path: "{{ item }}"
-      state: directory
-    with_items:
-    - "{{ env }}/group_vars/local"
-    - "{{ env }}/public-files"
-    - "{{ env }}/secret-files"
-
-  - name: Create hosts file
-    template:
-      dest: "{{ env }}/hosts"
-      src: roles/misc/templates/hosts
-
-  - name: Create ansible.cfg file
-    template:
-      dest: "{{ env }}/ansible.cfg"
-      src: roles/misc/templates/ansible.cfg
-
-  - name: create variable names file "plaintextvars.yaml" in group_vars defining "plaintext_files" variable
-    # This will also ensure there's a file in group_vars/local, so that Git will commit the directories
-    # content is plaintext_files: "{{ secret_files }}"
-    copy:
-      dest: "{{ env }}/group_vars/local/plaintextvars.yaml"
-      content: "plaintext_files: {{ '\"{{' }} secret_files {{ '}}\"' }}"
-
-  - name: create SSH keypair for this environment's machines
-    command: "ssh-keygen -f ~/.ssh/{{ env }}-key -N \"\""
-    args:
-      creates: "~/.ssh/{{ env }}-key"
-
-  - name: copy private keys to secret-files directory
-    copy:
-      src: "{{ item }}"
-      dest: "{{ env }}/secret-files/"
-      mode: 0600
-    with_items:
-    - "~/.ssh/{{ env }}-key"
-
-  - name: copy public keys to public-files directory
-    copy:
-      src: "{{ item }}"
-      dest: "{{ env }}/public-files/"
-    with_items:
-    - "~/.ssh/{{ env }}-key.pub"
-
-  - name: Create vault-password file with random password
-    command: "true {{ lookup('password', env + '/vault-password chars=ascii_letters') }}"
-    args:
-      creates: "{{ env }}/vault-password"
-
-  - include: roles/misc/tasks/add-to-git.yaml
+#  tasks:
+#  - debug: msg="Now, change to the directory of your new environment, edit the vars files as needed, and ansible-playboot ../make-cluster.yaml"

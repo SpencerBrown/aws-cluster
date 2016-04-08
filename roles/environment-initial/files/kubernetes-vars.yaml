@@ -1,0 +1,4 @@
+kubernetes_release: "1.2.2"
+kubernetes_release_url: "https://storage.googleapis.com/kubernetes-release/release/v{{ kubernetes_release }}/kubernetes.tar.gz"
+kubernetes_upgrade: false
+kubernetes_service_ip_range: "10.0.0.0/24"

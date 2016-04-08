@@ -1,0 +1,5 @@
+# Settings for cluster
+
+env: {{ env }}
+cluster_type_coreos: {{ cluster_type_coreos }}
+cluster_cloud_provider: {{ cluster_cloud_provider }}

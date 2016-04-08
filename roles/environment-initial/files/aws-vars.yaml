@@ -1,0 +1,42 @@
+# Define AWS structure of cluster
+
+aws_region: us-west-2
+aws_zone: us-west-2a
+cluster_ip_prefix: "172.20"
+cluster_pod_cidr: "10.1.0.0/16"
+aws_ami_type: hvm
+
+# The following configures the three clusters: etcd, master, worker.
+# subnet: is 0 for public subnet, 1 for private subnet.
+# Instances in the public subnet will have public IP addresses assigned at launch.
+# The public IP address may change if an instance is stopped, then started.
+
+cluster_etcd:
+  name: etcd
+  count: 1
+  instance_type: "t2.small"
+  root_volume_type: "gp2"
+  root_volume_size: 10
+  node_number: 7
+  subnet: 1
+  nfs_role: client
+
+cluster_master:
+  name: master
+  count: 1
+  instance_type: "t2.small"
+  root_volume_type: "gp2"
+  root_volume_size: 10
+  node_number: 20
+  subnet: 0
+  nfs_role: server
+
+cluster_worker:
+  name: worker
+  count: 1
+  instance_type: "t2.small"
+  root_volume_type: "gp2"
+  root_volume_size: 10
+  node_number: 30
+  subnet: 1
+  nfs_role: client

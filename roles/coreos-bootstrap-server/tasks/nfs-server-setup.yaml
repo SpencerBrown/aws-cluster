@@ -5,11 +5,6 @@
 
 - name: set up NFS server services
   service:
-    name: rpc-mountd
-    enabled: yes
-    state: started
-
-- service:
     name: nfs-server
     enabled: yes
     state: started
